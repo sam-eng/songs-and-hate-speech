@@ -9,14 +9,16 @@ import billboard
 import time
 import sys
 from requests.exceptions import HTTPError
+import lyricsgenius
 '''
 Current issues: having trouble creating data set due to rate limits on server. Not quite sure what the limits are, so it's challenging.
 TODO: pick a final date for ending web scraping
 TODO: pick chart for rap songs, chart for hip-hop songs
 TODO: send data to a csv? file, think of how to store it
-TODO: use Genius API to pull lyrics of songs
+
+Potential issues: lyricsgenius may not recognzie the form of the song titles from 
 '''
-r_songs = set()
+r_songs = {}
 '''
 r_chart = billboard.ChartData('hot-rap-tracks')
 count = 0
@@ -36,8 +38,13 @@ while r_chart.previousDate:
         time.sleep(120)
         print("current song list size: " + str(len(r_songs)))
 '''
-r_songs.add("Old Town Road")
-r_songs.add("Thotiana")
-r_songs.add("Sunflower (Spider-Man: Into The Spider-Verse)")
-
-print(r_songs)
+r_songs["Old Town Road"] = "Lil Nas X"
+r_songs["Thotiana"] = "Blueface"
+r_songs["Sunflower"] = "Post Malone & Swae Lee"
+genius = lyricsgenius.Genius("xNYwq4ZDn6Ytqu7pJ7Jvy-84TIuWLgwQTDQZ7cMe1ykdDIY7OwSCnblRToxw5N1y")
+r_lyrics = {}
+for song in r_songs:
+    print(r_songs[song])
+    g_song = genius.search_song(song, r_songs[song])
+    r_lyrics[song] = g_song.lyrics
+print(r_lyrics)
