@@ -1,6 +1,6 @@
 '''
-genius.py utilizes a billboard chart downloader (install with pip install billboard.py) to scrape the past [x] years of top r
-ap/hip-hop songs as ranked by Billboard, then uses Genius' API to build a dataset of lyrics from the songs.
+genius.py utilizes a billboard chart downloader (install with pip install billboard.py) to scrape the past 29 years of top rap/hip-hop
+songs as ranked by Billboard, then uses Genius' API to build a dataset of lyrics from the songs.
 '''
 
 from bs4 import BeautifulSoup
@@ -12,11 +12,10 @@ from requests.exceptions import HTTPError
 import lyricsgenius
 '''
 Current issues: having trouble creating data set due to rate limits on server. Not quite sure what the limits are, so it's challenging.
-TODO: pick a final date for ending web scraping
 TODO: pick chart for rap songs, chart for hip-hop songs
 TODO: send data to a csv? file, think of how to store it
 
-Potential issues: lyricsgenius may not recognzie the form of the song titles from 
+Potential issues: lyricsgenius may not recognzie the form of the song titles from Genius
 '''
 r_songs = {}
 '''
@@ -31,7 +30,7 @@ while r_chart.previousDate:
         time.sleep(2)
         print(r_chart.previousDate)
         # have a date limit
-        if (r_chart.previousDate < "2019-01-01"):
+        if (r_chart.previousDate < "1990-01-01"):
             break
     except HTTPError as err:
         print("Error reached, waiting 2 minutes to try again...")
@@ -40,7 +39,7 @@ while r_chart.previousDate:
 '''
 r_songs["Old Town Road"] = "Lil Nas X"
 r_songs["Thotiana"] = "Blueface"
-r_songs["Sunflower"] = "Post Malone & Swae Lee"
+r_songs["Sunflower"] = "Post Malone"
 genius = lyricsgenius.Genius("xNYwq4ZDn6Ytqu7pJ7Jvy-84TIuWLgwQTDQZ7cMe1ykdDIY7OwSCnblRToxw5N1y")
 r_lyrics = {}
 for song in r_songs:
