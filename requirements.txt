@@ -1,4 +1,6 @@
 billboard.py
 lyricsgenius
 nltk
+numpy
+pandas
 scikit-learn

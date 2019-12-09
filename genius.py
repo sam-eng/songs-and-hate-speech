@@ -29,8 +29,8 @@ Return: list of tweets that contain a 4+ word phrase identified as characteristi
 '''
 def find_songs():
     r_songs = {}
-    #start at 2004-01-24
-    r_chart = billboard.ChartData('hot-rap-tracks', '2004-01-24')
+    #start at 2002-04-13
+    r_chart = billboard.ChartData('hot-rap-tracks', '2002-04-13')
     while r_chart.previousDate:
         for song in r_chart:
             r_songs[song.title] = song.artist
@@ -64,6 +64,7 @@ def find_songs():
             with open('song-titles.txt', 'a+') as f:
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
+            print("CONNECTION ERROR")
             print("final (prev) date: " + r_chart.previousDate)
             break
 '''
