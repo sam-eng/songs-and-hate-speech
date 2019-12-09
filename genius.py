@@ -28,8 +28,8 @@ Return: list of tweets that contain a 4+ word phrase identified as characteristi
 '''
 def find_songs():
     r_songs = {}
-    #start at 2011-04-16
-    r_chart = billboard.ChartData('hot-rap-tracks', '2011-04-16')
+    #start at 2009-08-22
+    r_chart = billboard.ChartData('hot-rap-tracks', '2009-08-22')
     while r_chart.previousDate:
         for song in r_chart:
             r_songs[song.title] = song.artist
@@ -44,16 +44,27 @@ def find_songs():
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
                 break
-            if (len(r_songs) >= 200):
+            if (len(r_songs) >= 100):
                 with open('song-titles.txt', 'a+') as f:
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
                 print("final (prev) date: " + r_chart.previousDate)
                 break
         except HTTPError as err:
-            print("Error reached, waiting 2 minutes to try again...")
+            print("Error reached, waiting 2 minutes to try again... ") 
             time.sleep(120)
             print("current song list size: " + str(len(r_songs)))
+            '''with open('song-titles.txt', 'a+') as f:
+                    for song in r_songs:
+                        f.write(song+"\t"+r_songs[song]+"\n")
+            print("final (prev) date: " + r_chart.previousDate)'''
+            #break
+        except ConnectionResetError as e:
+            with open('song-titles.txt', 'a+') as f:
+                    for song in r_songs:
+                        f.write(song+"\t"+r_songs[song]+"\n")
+            print("final (prev) date: " + r_chart.previousDate)
+            break
 '''
 def find_lyrics():
 
