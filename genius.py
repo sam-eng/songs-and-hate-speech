@@ -21,15 +21,15 @@ Current issues: having trouble creating data set due to rate limits on server. N
 
 Issue: timeout means I had to form song list/lyrics in chunks
 
-TODO: Store lyrics (and n-grams) in JSON
+TODO: Store lyrics (and n-grams) in text files
 
 Return: list of tweets that contain a 4+ word phrase identified as characteristic of song lyrics
 
 '''
 def find_songs():
     r_songs = {}
-    #start at 2009-08-22
-    r_chart = billboard.ChartData('hot-rap-tracks', '2009-08-22')
+    #start at 2007-03-10
+    r_chart = billboard.ChartData('hot-rap-tracks', '2007-03-10')
     while r_chart.previousDate:
         for song in r_chart:
             r_songs[song.title] = song.artist
@@ -44,7 +44,7 @@ def find_songs():
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
                 break
-            if (len(r_songs) >= 100):
+            if (len(r_songs) >= 150):
                 with open('song-titles.txt', 'a+') as f:
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
@@ -59,7 +59,7 @@ def find_songs():
                         f.write(song+"\t"+r_songs[song]+"\n")
             print("final (prev) date: " + r_chart.previousDate)'''
             #break
-        except ConnectionResetError as e:
+        except (ConnectionResetError, ConnectionError) as e:
             with open('song-titles.txt', 'a+') as f:
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
