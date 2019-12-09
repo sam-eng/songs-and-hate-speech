@@ -39,8 +39,14 @@ def find_songs():
             time.sleep(2)
             print(r_chart.previousDate)
             # have a date limit
-            if (r_chart.previousDate < "1990-01-01"):
+            if (r_chart.previousDate is not None and r_chart.previousDate < "1990-01-01"):
                 print("DONE")
+                with open('song-titles.txt', 'a+') as f:
+                    for song in r_songs:
+                        f.write(song+"\t"+r_songs[song]+"\n")
+                break
+            if r_chart.previousDate is None:
+                print("DONE: NO MORE DATES")
                 with open('song-titles.txt', 'a+') as f:
                     for song in r_songs:
                         f.write(song+"\t"+r_songs[song]+"\n")
@@ -157,3 +163,5 @@ def find_lyrics():
 
 if __name__ == "__main__":
     find_songs()
+    #r_chart = billboard.ChartData('hot-rap-tracks', '1999-02-20')
+    #print()
