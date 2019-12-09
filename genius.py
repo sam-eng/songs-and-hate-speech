@@ -28,8 +28,8 @@ Return: list of tweets that contain a 4+ word phrase identified as characteristi
 '''
 def find_songs():
     r_songs = {}
-    #start at 2015-10-17
-    r_chart = billboard.ChartData('hot-rap-tracks', '2015-10-17')
+    #start at 2011-04-16
+    r_chart = billboard.ChartData('hot-rap-tracks', '2011-04-16')
     while r_chart.previousDate:
         for song in r_chart:
             r_songs[song.title] = song.artist
@@ -56,8 +56,12 @@ def find_songs():
             print("current song list size: " + str(len(r_songs)))
 '''
 def find_lyrics():
+
     # Get songs from song-titles.txt --> split by newline, then split by tab
     # keep dictionary of song/artist to track and ignore duplicates
+    with open("song-titles.txt") as f:
+        data = f.read()
+        songs = data.split("\n")
 
     r_songs["Loyal"] = "Chris Brown"
     genius = lyricsgenius.Genius("xNYwq4ZDn6Ytqu7pJ7Jvy-84TIuWLgwQTDQZ7cMe1ykdDIY7OwSCnblRToxw5N1y")
@@ -137,3 +141,6 @@ def find_lyrics():
 # strip blank lines
 # strip []
 # strip ()
+
+if __name__ == "__main__":
+    find_songs()
