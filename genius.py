@@ -142,7 +142,7 @@ def find_lyrics():
             line = re.sub(r'\([^()]*\)', '', line)
             # REMOVE PUNCTUATION
             line = line.translate(str.maketrans('', '', string.punctuation)) 
-            line = re.sub(r'([Yy]eah(ah)?)|([Ww]hoah?|(([Oo])+h)', '', line).strip() #won't remove ooh, remove Ha's
+            # line = re.sub(r'([Yy]eah(ah)?)|([Ww]hoah?|(([Oo])+h)', '', line).strip() #won't remove ooh, remove Ha's
             print(line)
             if len(line) != 0:
                 parsed_lyrics.append(line)
