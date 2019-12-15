@@ -244,10 +244,12 @@ def match_tweets(tweets):
         for ngram in ngrams:
             if ngram in processed_tweets[i]:
                 tweets_to_write.add(tweets[i])
+                print(ngram)
                 continue
-    with open("tweets-with-lyrics.csv", "w+") as f:
+    with open("trump-tweets-with-lyrics.csv", "w+") as f:
         for tweet in tweets_to_write:
             f.write(tweet + "\n")
+
 def preprocess(text_string):
     """
     Accepts a text string and replaces:
@@ -275,6 +277,6 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("ERROR: Need one command line argument for a CSV file with tweets to parse.")
         sys.exit(1)
-    tweet_file = pd.read_csv(sys.argv[1])
-    tweets = tweet_file.tweet
+    tweet_file = pd.read_csv(sys.argv[1], 'utf-8', engine="python", names=["text", "date", "fav", "retweets", "id"])
+    tweets = tweet_file.text[1:]
     match_tweets(tweets)
