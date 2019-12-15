@@ -78,42 +78,66 @@ def find_songs():
 
 # Using LyricsGenius, fetch stored information about songs, search for their lyrics in 
 def find_lyrics():
-    data = {}
-    # Get songs from song-titles.txt --> split by newline, then split by tab
-    # keep dictionary of song/artist to track and ignore duplicates
+    # Fetch saved song information from song-info.txt and save it as data
+    with open("song-info.txt") as f:
+         data = json.load(f)
+
+    # Get songs from song-titles.txt, each row is a song title, followed by \t, then the artist
     with open("song-titles.txt") as f:
         s_data = f.read()
         songs = s_data.split("\n")
-        print(songs)
     for song in songs:
         info = song.split("\t")
         if info[0] == "Sunflower (Spider-Man: Into The Spider-Verse)":
             info[0] = "Sunflower"
-        data[info[0]] = {}
-        data[info[0]]["author"] = info[1]
-    #sys.exit()
+        if (info[0] not in data):
+            data[info[0]] = {}
+            data[info[0]]["author"] = info[1]
+
+    # bad_lyrics stores the titles of songs whose lyrics are wrong or missing
+    bad_lyrics = []
+    with open('notes.txt') as f:
+        titles = f.read().split("\n")
+        for title in titles:
+            if (not title.startswith("IGNORE:")):
+                bad_lyrics.append(title)
+            else:
+                continue
+    # TODO: hide API key
     genius = lyricsgenius.Genius("xNYwq4ZDn6Ytqu7pJ7Jvy-84TIuWLgwQTDQZ7cMe1ykdDIY7OwSCnblRToxw5N1y")
     lyrics = {}
+    
     for song in data:
         try: 
-            g_song = genius.search_song(song, data[song]["author"])
-            if g_song is None:
-                print("yikes! there's an issue with this one")
-                with open("song-title-issues.txt", "a+") as f:
-                    f.write(song + "\n")
+            if ("lyrics" not in data[song]):
+                g_song = genius.search_song(song, data[song]["author"])
+                if g_song is None:
+                    print("ERROR: Lyrics could not be found")
+                    with open("song-title-issues.txt", "a+") as f:
+                        f.write(song + "\n")
+                    continue
+                lyrics[song] = g_song.lyrics
+                print(song)
+            elif song in bad_lyrics:
+                g_song = genius.search_song(song, data[song]["author"])
+                if g_song is None:
+                    print("ERROR: Bad lyrics re-search failed")
+                    with open("song-title-issues.txt", "a+") as f:
+                        f.write(song + "\n")
+                    continue
+                lyrics[song] = g_song.lyrics
+                print(g_song.lyrics)
+                print(song)
+            else:
                 continue
-            lyrics[song] = g_song.lyrics
         except: 
-            print("yikes! there's an issue with this one")
+            print("ERROR: Could not get song lyrics")
             with open("song-title-issues.txt", "a+") as f:
                 f.write(song + "\n")
             continue
 
-    lyric_stop_words = ["whoa", "woah", "yeah", "yea", "ah", "ha"]
-
     # Process lyrics
-    for song in lyrics:
-        split_lyrics = lyrics[song].split("\n")
+    for song in data:
         new_lyrics = []
         # Remove lines entirely in brackets and parenthesis
         for i in range(len(split_lyrics)):
@@ -130,20 +154,24 @@ def find_lyrics():
         # Save these lightly processed lyrics in the dictionary
         data[song]["lyrics"] = new_lyrics
         print(song)
-    with open("song-info.txt", "w+") as f:
+    with open("song-info-2.txt", "w+") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+    
     for song in data:
-        '''
-        song_lyrics = 
+        if not "lyrics" in data[song]:
+            continue
+        if song in bad_lyrics:
+            continue
+        print(song)
+        
         parsed_lyrics = []
-        for i in range(len(new_lyrics)):
-            line = new_lyrics[i]
-            print(line)
+        for i in range(len(data[song]["lyrics"])):
+            line = data[song]["lyrics"][i]
             line = re.sub(r'\([^()]*\)', '', line)
             # REMOVE PUNCTUATION
-            line = line.translate(str.maketrans('', '', string.punctuation)) 
-            # line = re.sub(r'([Yy]eah(ah)?)|([Ww]hoah?|(([Oo])+h)', '', line).strip() #won't remove ooh, remove Ha's
-            print(line)
+            line = line.translate(str.maketrans('', '', string.punctuation.replace("-", ""))) 
+            line = re.sub(r'([Yy]eah)|([Ww]hoah?)|([Oo]h)', '', line).strip() #won't remove ooh, remove Ha's
+            line = line.lower()
             if len(line) != 0:
                 parsed_lyrics.append(line)
         all_ngrams = []
@@ -152,17 +180,13 @@ def find_lyrics():
         analyzer = vect.build_analyzer()
         listNgramQuery = analyzer(final_lyrics)
         listNgramQuery.reverse()
-        #print("listNgramQuery=", listNgramQuery)
-        # NgramQueryWeights = nltk.FreqDist(listNgramQuery)
-        # print("NgramQueryWeights=", NgramQueryWeights)
         add = {}
         add[4] = []
         add[5] = []
         add[6] = []
         add[7] = []
-        count = 0
+        # Generate top 3 n-grams of each length for the song
         for ngram in listNgramQuery:
-            print(ngram)
             ngrambits = ngram.split("asdf")
             if len(ngrambits) > 1:
                 ngrambit = ngrambits[1] if len(ngrambits[1]) > len(ngrambits[0]) else ngrambits[0]
@@ -170,28 +194,35 @@ def find_lyrics():
                 ngrambit = ngrambits[0]
             ngrambit = ngrambit.strip()
             length = len(ngrambit.split(" "))
-            if (length in add) and len(add[length]) < 4 and (ngrambit not in add[length]):
-                print(ngrambit)
+            if (length in add) and len(add[length]) < 3 and (ngrambit not in add[length]):
                 add[length].append(ngrambit.strip())
-            elif (length in add) and len(add[length]) >= 4:
-                print(add)
-                break
+            elif (length in add) and len(add[length]) >= 3:
+                if len(add[length]) == len(add[4]) == len(add[5]) == len(add[6]) == len(add[7]):
+                    print(song)
+                    data[song]["ngrams"] = add
+                    break
+                else:
+                    continue
             else:
-                continue
-        '''    
-'''
-# calculate the most characteristic lines of the song
-# pick top N (n = 2 or 3?) lines and save those
-# compare tweets to those top lines
+                continue   
+    # Write results to file
+    with open("song-info-final.txt", "w+") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
-#print(r_lyrics)
-# strip blank lines
-# strip []
-# strip ()
-'''
+def match_tweets(tweets):
+    # open csv + pull tweets
+    # create copy of tweets array to modify
+    '''
+    for i in range(len(tweet_copy)):
+        if (tweet_copy[i] is in ngrams):
+            with open("labeled_data.csv || trump_tweets.csv", "a+") as f:
+                f.write(tweets[i] + "\n")
+    '''
+
 if __name__ == "__main__":
-    #with open("song-titles.txt", 'a+') as f:
-    #    f.write("Gimme Some More\tBusta Rhymes")
-    find_lyrics()
-    #r_chart = billboard.ChartData('hot-rap-tracks', '1999-02-20')
-    #print()
+    # find_songs()
+    # find_lyrics()
+    # labeled_data.csv and trump_tweets.csv
+    # output in same file? 
+    tweets = []
+    match_tweets(tweets)

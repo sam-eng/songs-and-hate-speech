@@ -1,4 +1,4 @@
-Not lyrics:
+IGNORE: LyricsGenius returned non-lyrics
 The London
 Hot Girls Summer
 BOP
@@ -8,7 +8,7 @@ Goodbyes
 Wish Wish
 Go Loko
 Broke Leg
-Wake Up In the Sky
+Wake Up In The Sky
 Tints
 W O R K I N  M E
 Apes**t
@@ -95,11 +95,8 @@ Who Do You Believe In
 Players Holiday
 Jigga What...
 It Ain't My Fault 1 & 2
-
-Broken/Incomplete:
 Put a Date on It
-
-No Lyrics:
+IGNORE: LyricsGenius did not return lyrics
 Wokeuplikethis*
 2AM
 Up Now
@@ -196,9 +193,7 @@ Bling Bling
 B-Please
 Can I Get A...
 No Pigeons
-
-
-Wrong Language:
+IGNORE: LyricsGenius returned wrong lyrics in another language or right lyrics in another language
 Enemies
 Be Like Me
 Good Form
