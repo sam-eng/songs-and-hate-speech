@@ -18,7 +18,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from nltk.collocations import *
 from nltk.probability import FreqDist
 import json
+import pandas as pd
 '''
+
 Current issues: having trouble creating data set due to rate limits on server. Not quite sure what the limits are, so it's challenging.
 
 Issue: timeout means I had to form song list/lyrics in chunks
@@ -218,11 +220,61 @@ def match_tweets(tweets):
             with open("labeled_data.csv || trump_tweets.csv", "a+") as f:
                 f.write(tweets[i] + "\n")
     '''
+    # process tweets
+    processed_tweets = []
+    for tweet in tweets:
+        processed_tweet = preprocess(tweet)
+        processed_tweet = re.sub(r'&amp;', '&', processed_tweet)
+        processed_tweet = processed_tweet.translate(str.maketrans('', '', string.punctuation.replace("-", ""))) 
+        processed_tweet = re.sub(r'([Yy]eah)|([Ww]hoah?)|([Oo]h)', '', processed_tweet).strip() #won't remove ooh, remove Ha's
+        processed_tweet = processed_tweet.lower()
+        processed_tweets.append(processed_tweet)
+    # create one big set of ngrams to make matching easier
+    ngrams = set()
+    with open("song-info-final.txt") as f:
+        song_data = json.load(f)
+        for song in song_data:
+            if (not "ngrams" in song_data[song]):
+                continue
+            for ngram_len in song_data[song]["ngrams"]:
+                for ngram in song_data[song]["ngrams"][ngram_len]:
+                    ngrams.add(ngram)
+    tweets_to_write = set()
+    for i in range(len(processed_tweets)):
+        for ngram in ngrams:
+            if ngram in processed_tweets[i]:
+                tweets_to_write.add(tweets[i])
+                continue
+    with open("tweets-with-lyrics.csv", "w+") as f:
+        for tweet in tweets_to_write:
+            f.write(tweet + "\n")
+def preprocess(text_string):
+    """
+    Accepts a text string and replaces:
+    1) urls with URLHERE
+    2) lots of whitespace with one instance
+    3) mentions with MENTIONHERE
+
+    This allows us to get standardized counts of urls and mentions
+    Without caring about specific people mentioned
+    """
+    space_pattern = '\s+'
+    giant_url_regex = ('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|'
+        '[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+    mention_regex = '@[\w\-]+'
+    parsed_text = re.sub(space_pattern, ' ', text_string)
+    parsed_text = re.sub(giant_url_regex, '', parsed_text)
+    parsed_text = re.sub(mention_regex, '', parsed_text)
+    return parsed_text
 
 if __name__ == "__main__":
     # find_songs()
     # find_lyrics()
     # labeled_data.csv and trump_tweets.csv
     # output in same file? 
-    tweets = []
+    if len(sys.argv) != 2:
+        print("ERROR: Need one command line argument for a CSV file with tweets to parse.")
+        sys.exit(1)
+    tweet_file = pd.read_csv(sys.argv[1])
+    tweets = tweet_file.tweet
     match_tweets(tweets)
