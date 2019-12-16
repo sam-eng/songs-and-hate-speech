@@ -221,14 +221,18 @@ def match_tweets(tweets):
                 f.write(tweets[i] + "\n")
     '''
     # process tweets
+    original_tweets = []
     processed_tweets = []
     for tweet in tweets:
+        original_tweets.append(tweet)
         processed_tweet = preprocess(tweet)
         processed_tweet = re.sub(r'&amp;', '&', processed_tweet)
         processed_tweet = processed_tweet.translate(str.maketrans('', '', string.punctuation.replace("-", ""))) 
         processed_tweet = re.sub(r'([Yy]eah)|([Ww]hoah?)|([Oo]h)', '', processed_tweet).strip() #won't remove ooh, remove Ha's
         processed_tweet = processed_tweet.lower()
         processed_tweets.append(processed_tweet)
+    print(original_tweets[0])
+    print(processed_tweets[0])
     # create one big set of ngrams to make matching easier
     ngrams = set()
     with open("song-info-final.txt") as f:
@@ -240,13 +244,23 @@ def match_tweets(tweets):
                 for ngram in song_data[song]["ngrams"][ngram_len]:
                     ngrams.add(ngram)
     tweets_to_write = set()
+    # TODO: add offensive ngrams 
+    offensive_words = [" blacks ", " chink ", " chinks ", " dykes ", " faggot ", " faggots ", " fags",
+                       " homo ", " inbred ", " nigga ", " niggas ", " nigger ", " niggers ", " queers ",
+                       " raped ", " savages ", " slave ", " spic ", " wetback ", " wetbacks ", " coon ",
+                       " bitch ", " pussy ", " fuck"]
     for i in range(len(processed_tweets)):
         for ngram in ngrams:
             if ngram in processed_tweets[i]:
-                tweets_to_write.add(tweets[i])
-                print(ngram)
+                #tweets_to_write.add(original_tweets[i])
+                for word in offensive_words:
+                    if word in ngram:
+                        tweets_to_write.add(original_tweets[i])
+                        print(ngram)
+                        #break
                 continue
-    with open("trump-tweets-with-lyrics.csv", "w+") as f:
+                #break
+    with open("filtered-trump-tweets-with-lyrics.csv", "w+") as f:
         for tweet in tweets_to_write:
             f.write(tweet + "\n")
 
@@ -277,6 +291,10 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("ERROR: Need one command line argument for a CSV file with tweets to parse.")
         sys.exit(1)
-    tweet_file = pd.read_csv(sys.argv[1], 'utf-8', engine="python", names=["text", "date", "fav", "retweets", "id"])
-    tweets = tweet_file.text[1:]
+    if sys.argv[1] == "trump_tweets.csv":
+        tweet_file = pd.read_csv(sys.argv[1], 'utf-8', engine="python", names=["text", "date", "fav", "retweets", "id"])
+        tweets = tweet_file.text[1:]
+    else:
+        tweet_file = pd.read_csv(sys.argv[1])
+        tweets = tweet_file.tweet
     match_tweets(tweets)
