@@ -1,11 +1,15 @@
-# NLP Final Project
+# NLP Final Project for CSCI-UA 480-006
+
+Domnica Dzitac and Samantha Eng
 
 To set up and run with a virtual environment:
 
 Generate an API key for Genius' API. Replace "[INSERT API KEY HERE]" with your API key.
 
 > virtualenv venv
+>
 > source venv/bin/activate
+>
 > pip install -r requirements.txt
 
 Data file guide:
@@ -20,11 +24,15 @@ Data file guide:
 - tweets-with-lyrics.csv: list of tweets from labeled_data.csv identified as having song lyrics
 
 How to run:
+
 python3 genius.py [data file name of tweets to match] [output file name to write results to]
 
 Notes:
+
 This code assumes that there is already a dataset called song-info-final.txt that contains JSON data described in our project write-up.
 
 Work breakdown:
+
 Samantha worked on genius.py, creating song-info-final.txt and the csv files with tweets with tweets matched with song lyric n-grams.
+
 Domnica worked on code.py, convert.py, and creating the pickled files, models, and actually running the system.
