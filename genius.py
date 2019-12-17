@@ -139,11 +139,11 @@ def find_lyrics():
             continue
 
     # Process lyrics
-    for song in data:
+    for song in lyrics:
         new_lyrics = []
         # Remove lines entirely in brackets and parenthesis
-        for i in range(len(split_lyrics)):
-            line = split_lyrics[i]
+        for i in range(len(lyrics[song])):
+            line = lyrics[song][i]
             if len(line) == 0:
                 continue
             elif line[0] == "[" and line[len(line) - 1] == "]":
@@ -164,8 +164,6 @@ def find_lyrics():
             continue
         if song in bad_lyrics:
             continue
-        print(song)
-        
         parsed_lyrics = []
         for i in range(len(data[song]["lyrics"])):
             line = data[song]["lyrics"][i]
@@ -211,16 +209,8 @@ def find_lyrics():
     with open("song-info-final.txt", "w+") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-def match_tweets(tweets):
-    # open csv + pull tweets
-    # create copy of tweets array to modify
-    '''
-    for i in range(len(tweet_copy)):
-        if (tweet_copy[i] is in ngrams):
-            with open("labeled_data.csv || trump_tweets.csv", "a+") as f:
-                f.write(tweets[i] + "\n")
-    '''
-    # process tweets
+def match_tweets(tweets, outputfile):
+    # Process tweets
     original_tweets = []
     processed_tweets = []
     for tweet in tweets:
@@ -233,7 +223,7 @@ def match_tweets(tweets):
         processed_tweets.append(processed_tweet)
     print(original_tweets[0])
     print(processed_tweets[0])
-    # create one big set of ngrams to make matching easier
+    # Create one big set of ngrams to make matching easier
     ngrams = set()
     with open("song-info-final.txt") as f:
         song_data = json.load(f)
@@ -244,7 +234,7 @@ def match_tweets(tweets):
                 for ngram in song_data[song]["ngrams"][ngram_len]:
                     ngrams.add(ngram)
     tweets_to_write = set()
-    # TODO: add offensive ngrams 
+    # Define list of offensive words
     offensive_words = [" blacks ", " chink ", " chinks ", " dykes ", " faggot ", " faggots ", " fags",
                        " homo ", " inbred ", " nigga ", " niggas ", " nigger ", " niggers ", " queers ",
                        " raped ", " savages ", " slave ", " spic ", " wetback ", " wetbacks ", " coon ",
@@ -252,18 +242,18 @@ def match_tweets(tweets):
     for i in range(len(processed_tweets)):
         for ngram in ngrams:
             if ngram in processed_tweets[i]:
-                #tweets_to_write.add(original_tweets[i])
+                tweets_to_write.add(original_tweets[i])
                 for word in offensive_words:
                     if word in ngram:
-                        tweets_to_write.add(original_tweets[i])
-                        print(ngram)
-                        #break
+                        # Uncomment/comment the following line to toggle filtered/unfiltered tweets for offensive words
+                        #tweets_to_write.add(original_tweets[i])
+                        print()
                 continue
-                #break
-    with open("filtered-trump-tweets-with-lyrics.csv", "w+") as f:
+    with open(outputfile, "w+") as f:
         for tweet in tweets_to_write:
             f.write(tweet + "\n")
 
+# preprocess is taken from Davidson et al.'s system that code.py is based off of.
 def preprocess(text_string):
     """
     Accepts a text string and replaces:
@@ -288,8 +278,8 @@ if __name__ == "__main__":
     # find_lyrics()
     # labeled_data.csv and trump_tweets.csv
     # output in same file? 
-    if len(sys.argv) != 2:
-        print("ERROR: Need one command line argument for a CSV file with tweets to parse.")
+    if len(sys.argv) != 3:
+        print("ERROR: Need one command line argument for a CSV file with tweets to parse and one for the output file name.")
         sys.exit(1)
     if sys.argv[1] == "trump_tweets.csv":
         tweet_file = pd.read_csv(sys.argv[1], 'utf-8', engine="python", names=["text", "date", "fav", "retweets", "id"])
@@ -297,4 +287,4 @@ if __name__ == "__main__":
     else:
         tweet_file = pd.read_csv(sys.argv[1])
         tweets = tweet_file.tweet
-    match_tweets(tweets)
+    match_tweets(tweets, sys.argv[2])
