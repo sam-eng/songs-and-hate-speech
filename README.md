@@ -35,4 +35,4 @@ Work breakdown:
 
 Samantha worked on genius.py, creating song-info-final.txt and the csv files with tweets with tweets matched with song lyric n-grams.
 
-Domnica worked on code.py, convert.py, and creating the pickled files, models, and actually running the system.
+Domnica worked on training.py and classifier.py and creating the pickled files, models, and actually running the system.
