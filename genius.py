@@ -19,17 +19,6 @@ from nltk.collocations import *
 from nltk.probability import FreqDist
 import json
 import pandas as pd
-'''
-
-Current issues: having trouble creating data set due to rate limits on server. Not quite sure what the limits are, so it's challenging.
-
-Issue: timeout means I had to form song list/lyrics in chunks
-
-TODO: Store lyrics (and n-grams) in text files
-
-Return: list of tweets that contain a 4+ word phrase identified as characteristic of song lyrics
-
-'''
 
 # Using Billboard.py, get information of at least 150 songs in the Billboard hot rap tracks chart
 def find_songs():
@@ -105,8 +94,8 @@ def find_lyrics():
                 bad_lyrics.append(title)
             else:
                 continue
-    # TODO: hide API key
-    genius = lyricsgenius.Genius("xNYwq4ZDn6Ytqu7pJ7Jvy-84TIuWLgwQTDQZ7cMe1ykdDIY7OwSCnblRToxw5N1y")
+
+    genius = lyricsgenius.Genius("[INSERT API KEY HERE]")
     lyrics = {}
     
     for song in data:
